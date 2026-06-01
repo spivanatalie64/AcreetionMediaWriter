@@ -408,6 +408,7 @@ jobs:
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-win64-${{ env.TAG_NAME }}.exe"
 
       - name: Publish to WinGet
+        continue-on-error: true
         uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: AcreetionOS.AcreetionOSMediaWriter
