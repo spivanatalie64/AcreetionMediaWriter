@@ -111,10 +111,9 @@ bool ReleaseManager::frontPage() const
 void ReleaseManager::setFrontPage(bool o)
 {
     if (m_frontPage != o) {
-        beginFilterChange();
         m_frontPage = o;
         Q_EMIT frontPageChanged();
-        endFilterChange();
+        invalidateFilter();
     }
 }
 
@@ -126,10 +125,9 @@ QString ReleaseManager::filterText() const
 void ReleaseManager::setFilterText(const QString &o)
 {
     if (m_filterText != o) {
-        beginFilterChange();
         m_filterText = o;
         Q_EMIT filterTextChanged();
-        endFilterChange();
+        invalidateFilter();
     }
 }
 
@@ -141,11 +139,10 @@ int ReleaseManager::filterSource() const
 void ReleaseManager::setFilterSource(int source)
 {
     if (m_filterSource != source) {
-        beginFilterChange();
         m_filterSource = source;
         Q_EMIT filterSourceChanged();
         Q_EMIT firstSourceChanged();
-        endFilterChange();
+        invalidateFilter();
     }
 }
 
@@ -231,7 +228,6 @@ int ReleaseManager::filterArchitecture() const
 void ReleaseManager::setFilterArchitecture(int o)
 {
     if (m_filterArchitecture != o && m_filterArchitecture >= 0 && m_filterArchitecture < ReleaseArchitecture::_ARCHCOUNT) {
-        beginFilterChange();
         m_filterArchitecture = o;
         Q_EMIT filterArchitectureChanged();
         for (int i = 0; i < m_sourceModel->rowCount(); i++) {
@@ -247,7 +243,7 @@ void ReleaseManager::setFilterArchitecture(int o)
                 }
             }
         }
-        endFilterChange();
+        invalidateFilter();
     }
 }
 
