@@ -178,8 +178,6 @@ jobs:
 
           DESTDIR=$(pwd)/rpm-staging cmake --install build
 
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
           cat > ~/rpmbuild/SPECS/acreetionos-mediawriter.spec << RPMSEC
           Name:           acreetionos-mediawriter
           Version:        ${VERSION_STRIPPED}
@@ -193,7 +191,7 @@ jobs:
           like flash drives or memory cards.
 
           %install
-          :
+          cp -a $(pwd)/rpm-staging/* %{buildroot}/
 
           %files
           %{_bindir}/mediawriter
@@ -203,10 +201,7 @@ jobs:
           %{_datadir}/icons/hicolor/*/apps/org.acreetionos.MediaWriter.png
           RPMSEC
 
-          rpmbuild -bb \
-            --buildroot "$(pwd)/rpm-staging" \
-            --define "__spec_install_pre :" \
-            ~/rpmbuild/SPECS/acreetionos-mediawriter.spec
+          rpmbuild -bb ~/rpmbuild/SPECS/acreetionos-mediawriter.spec
 
           cp ~/rpmbuild/RPMS/x86_64/*.rpm "AcreetionOSMediaWriter-linux-x86_64-$TAG.rpm"
 
