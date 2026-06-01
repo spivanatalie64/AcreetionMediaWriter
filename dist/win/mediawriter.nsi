@@ -83,7 +83,7 @@ Var UninstLog
         !system 'mv "../../build/wineprefix/drive_c/uninstall.unsigned.exe" "../../build/wineprefix/drive_c/uninstall.exe"' = 0
     !endif
 
-    outFile "FMW-setup.exe"
+    outFile "AMW-setup.exe"
     SetCompressor /SOLID lzma
 !endif
 
