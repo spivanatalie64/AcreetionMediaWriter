@@ -178,6 +178,8 @@ jobs:
 
           DESTDIR=$(pwd)/rpm-staging cmake --install build
 
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
           cat > ~/rpmbuild/SPECS/acreetionos-mediawriter.spec << RPMSEC
           Name:           acreetionos-mediawriter
           Version:        ${VERSION_STRIPPED}
