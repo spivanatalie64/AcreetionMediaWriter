@@ -27,7 +27,8 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter.git",
-                    "branch": "main"
+                    "tag": "v5.3.1",
+                    "commit": "ff85a2389455b3cfcdfe2b036663d952ce6eda51"
                 }
             ]
         }
