@@ -8,6 +8,9 @@ on:
   release:
     types: [ created ]
 
+permissions:
+  contents: write
+
 env:
     QT_VERSION: '6.10.2'
 
