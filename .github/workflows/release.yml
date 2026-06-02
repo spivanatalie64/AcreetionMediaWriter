@@ -2,6 +2,7 @@ name: release
 
 on:
   push:
+    branches: [main]
     tags:
       - '[0-9]*.[0-9]*.[0-9]*'
       - 'v[0-9]*.[0-9]*.[0-9]*'
@@ -16,6 +17,7 @@ env:
 
 jobs:
   create-release:
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
@@ -42,7 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Linux:
-    needs: create-release
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -117,15 +118,16 @@ jobs:
           dpkg-deb --build $DEB_DIR "AcreetionOSMediaWriter-linux-x86_64-$TAG.deb"
 
       - name: Upload AppImage to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.AppImage"
 
       - name: Upload DEB to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.deb"
 
   Flatpak:
-    needs: create-release
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
@@ -143,11 +145,11 @@ jobs:
           cache-key: flatpak-builder-${{ github.sha }}
 
       - name: Upload to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="org.acreetionos.MediaWriter.flatpak"
 
   RPM:
-    needs: create-release
     runs-on: ubuntu-latest
     container: fedora:41
     steps:
@@ -208,11 +210,11 @@ jobs:
           cp ~/rpmbuild/RPMS/x86_64/*.rpm "AcreetionOSMediaWriter-linux-x86_64-$TAG.rpm"
 
       - name: Upload RPM to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.rpm"
 
   macOS:
-    needs: create-release
     strategy:
       matrix:
         arch: [x86_64, arm64]
@@ -268,13 +270,13 @@ jobs:
           path: AcreetionOSMediaWriter-macos${{ matrix.dmg_arch_suffix }}-${{ env.TAG_NAME }}.dmg
 
       - name: Upload to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           set -eo pipefail
           # Pass the full filename including the architecture suffix
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-macos${{ matrix.dmg_arch_suffix }}-${{ env.TAG_NAME }}.dmg"
 
   Windows-MSVC:
-    needs: create-release
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v6
@@ -400,14 +402,17 @@ jobs:
           7z a -tzip "AcreetionOSMediaWriter-win64-portable-${{ env.TAG_NAME }}.zip" ./AcreetionOSMediaWriter-portable/*
 
       - name: Upload Portable to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-win64-portable-${{ env.TAG_NAME }}.zip"
 
       - name: Upload to GitHub (release)
+        if: github.ref_type == 'tag'
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-win64-${{ env.TAG_NAME }}.exe"
 
       - name: Publish to WinGet
+        if: github.ref_type == 'tag'
         continue-on-error: true
         uses: vedantmgoyal9/winget-releaser@main
         with:
