@@ -43,12 +43,16 @@ Arch Linux users can install from the AUR:
 paru -S acreetionos-mediawriter
 # or
 yay -S acreetionos-mediawriter
+```
 
+```bash
 # Pre-built binary (no compilation)
 paru -S acreetionos-mediawriter-bin
 # or
 yay -S acreetionos-mediawriter-bin
+```
 
+```bash
 # Manual build from source
 git clone https://aur.archlinux.org/acreetionos-mediawriter.git
 cd acreetionos-mediawriter
