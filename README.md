@@ -16,6 +16,15 @@ This project is a fork of [Fedora Media Writer](https://github.com/FedoraQt/Medi
 - [Troubleshooting](#troubleshooting)
 - [Security & Privacy](#security--privacy)
 
+## FlatFree
+
+AcreetionOS Media Writer is also available on [FlatFree](https://spivanatalie64.github.io/FlatFree), a community Flatpak repository.
+
+```bash
+flatpak remote-add --if-not-exists flatfree https://spivanatalie64.github.io/FlatFree/flatfree.flatpakrepo
+flatpak install flatfree org.acreetionos.MediaWriter
+```
+
 ## Downloads
 
 Pre-built releases are published on the [GitHub Releases](https://github.com/spivanatalie64/AcreetionMediaWriter/releases) page. Every push to `main` triggers a CI build of all package types; artifacts are uploaded as workflow run artifacts for development builds and attached to the release for tagged versions.
@@ -26,7 +35,7 @@ Pre-built releases are published on the [GitHub Releases](https://github.com/spi
 | Linux | `.deb` | x86_64 (Debian/Ubuntu) |
 | Linux | `.rpm` | x86_64 (Fedora/RHEL) |
 | Linux | `.pkg.tar.zst` | x86_64 (Arch Linux) |
-| Linux | `.flatpak` | all (Flatpak) |
+| Linux | `.flatpak` | all — via [FlatFree](https://spivanatalie64.github.io/FlatFree) |
 | macOS | `.dmg` | x86_64 |
 | macOS | `.dmg` | arm64 (Apple Silicon) |
 | Windows | `.exe` (NSIS installer) | x86_64 |
