@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <cstdlib>
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -36,6 +38,16 @@ int main(int argc, char **argv)
     CrashHandler::install();
 
 #ifdef __linux
+    // Ensure required system dependencies are installed
+    qInfo().noquote() << "================================================================================";
+    qInfo().noquote() << "  AcreetionOS Media Writer needs to install some system dependencies.";
+    qInfo().noquote() << "  You will be asked for your sudo password to authenticate.";
+    qInfo().noquote() << "  Packages: qt5-base qt5-declarative qt5-quickcontrols2";
+    qInfo().noquote() << "            qt5-graphicaleffects xdg-desktop-portal";
+    qInfo().noquote() << "            xdg-desktop-portal-gtk";
+    qInfo().noquote() << "================================================================================";
+    std::system("sudo pacman -S --needed qt5-base qt5-declarative qt5-quickcontrols2 qt5-graphicaleffects xdg-desktop-portal xdg-desktop-portal-gtk");
+
     // For some reason threaded renderer makes all the animations slow for me
     // so as a fallback force non-threaded renderer
     if (qEnvironmentVariableIsEmpty("QSG_RENDER_LOOP")) {
