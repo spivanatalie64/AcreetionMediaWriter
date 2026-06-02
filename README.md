@@ -10,14 +10,32 @@ This project is a fork of [Fedora Media Writer](https://github.com/FedoraQt/Medi
 
 ## Table of Contents
 
+- [Downloads](#downloads)
 - [Building](#building)
 - [Translation](#translation)
 - [Troubleshooting](#troubleshooting)
 - [Security & Privacy](#security--privacy)
 
+## Downloads
+
+Pre-built releases are published on the [GitHub Releases](https://github.com/spivanatalie64/AcreetionMediaWriter/releases) page. Every push to `main` triggers a CI build of all package types; artifacts are uploaded as workflow run artifacts for development builds and attached to the release for tagged versions.
+
+| Package | Format | Platform |
+|---------|--------|----------|
+| Linux | `.AppImage` | x86_64 |
+| Linux | `.deb` | x86_64 (Debian/Ubuntu) |
+| Linux | `.rpm` | x86_64 (Fedora/RHEL) |
+| Linux | `.flatpak` | all (Flatpak) |
+| macOS | `.dmg` | x86_64 |
+| macOS | `.dmg` | arm64 (Apple Silicon) |
+| Windows | `.exe` (NSIS installer) | x86_64 |
+| Windows | `.zip` (portable) | x86_64 |
+
+Arch Linux users can also use the [PKGBUILD](./dist/archlinux/PKGBUILD) (stable) or [PKGBUILD](./dist/archlinux/mediawriter-git/PKGBUILD) (development).
+
 ## Building
 
-You can build AcreetionOS Media Writer using the standard Qt `cmake` build system. For a detailed look at how releases are composed, see the [GitHub Actions configuration](https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/blob/master/.github/workflows/ccpp.yml).
+You can build AcreetionOS Media Writer using the standard Qt `cmake` build system. For a detailed look at how releases are composed, see the [GitHub Actions configuration](https://github.com/spivanatalie64/AcreetionMediaWriter/tree/main/.github/workflows).
 
 ### Requirements
 
