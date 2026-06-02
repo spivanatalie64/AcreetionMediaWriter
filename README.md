@@ -32,11 +32,28 @@ Pre-built releases are published on the [GitHub Releases](https://github.com/spi
 | Windows | `.exe` (NSIS installer) | x86_64 |
 | Windows | `.zip` (portable) | x86_64 |
 
-Arch Linux users can install directly from the AUR:
+Arch Linux users can install from the AUR:
 
 - [acreetionos-mediawriter](https://aur.archlinux.org/packages/acreetionos-mediawriter) — builds from source
 - [acreetionos-mediawriter-bin](https://aur.archlinux.org/packages/acreetionos-mediawriter-bin) — pre-built binary from GitHub releases
 - [mediawriter-git](https://aur.archlinux.org/packages/mediawriter-git) — development build (existing standalone package)
+
+```bash
+# With an AUR helper (e.g. paru or yay)
+paru -S acreetionos-mediawriter
+# or
+yay -S acreetionos-mediawriter
+
+# Pre-built binary (no compilation)
+paru -S acreetionos-mediawriter-bin
+# or
+yay -S acreetionos-mediawriter-bin
+
+# Manual build from source
+git clone https://aur.archlinux.org/acreetionos-mediawriter.git
+cd acreetionos-mediawriter
+makepkg -si
+```
 
 ## Building
 
