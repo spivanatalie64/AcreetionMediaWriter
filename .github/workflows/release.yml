@@ -214,6 +214,63 @@ jobs:
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.rpm"
 
+  Arch Linux:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set env (TAG_NAME)
+        run: echo "TAG_NAME=$(bash ./dist/get-tag-name.sh)" >> $GITHUB_ENV
+
+      - name: Install build dependencies
+        run: |
+          pacman -Sy --noconfirm --needed \
+            cmake ninja gcc \
+            qt6-base qt6-declarative qt6-svg \
+            xz glibc hicolor-icon-theme
+
+      - name: Build
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_SKIP_RPATH=ON
+          cmake --build build
+
+      - name: Create Arch package
+        run: |
+          TAG="${{ env.TAG_NAME }}"
+          VERSION_STRIPPED=$(sed "s/-.*//" <<< "$TAG")
+          if [[ "$VERSION_STRIPPED" == "" ]]; then
+            VERSION_STRIPPED=5.3.50
+          fi
+
+          DESTDIR=$(pwd)/pkg-staging cmake --install build
+
+          cd pkg-staging
+
+          # Create .PKGINFO
+          cat > .PKGINFO << EOF
+          pkgname = acreetionos-mediawriter
+          pkgver = ${VERSION_STRIPPED}
+          pkgdesc = AcreetionOS USB Flasher
+          url = https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+          builddate = $(date -u +%s)
+          packager = GitHub Actions
+          size = $(du -sb . | cut -f1)
+          arch = x86_64
+          license = GPL2
+          EOF
+
+          tar --zstd -cf "../AcreetionOSMediaWriter-linux-x86_64-$TAG.pkg.tar.zst" \
+            .PKGINFO usr/
+
+      - name: Upload Arch package to GitHub (release)
+        if: github.ref_type == 'tag'
+        run: |
+          bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.pkg.tar.zst"
+
   macOS:
     strategy:
       matrix:

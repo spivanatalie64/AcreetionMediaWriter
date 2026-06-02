@@ -25,6 +25,7 @@ Pre-built releases are published on the [GitHub Releases](https://github.com/spi
 | Linux | `.AppImage` | x86_64 |
 | Linux | `.deb` | x86_64 (Debian/Ubuntu) |
 | Linux | `.rpm` | x86_64 (Fedora/RHEL) |
+| Linux | `.pkg.tar.zst` | x86_64 (Arch Linux) |
 | Linux | `.flatpak` | all (Flatpak) |
 | macOS | `.dmg` | x86_64 |
 | macOS | `.dmg` | arm64 (Apple Silicon) |
