@@ -32,8 +32,9 @@ Pre-built releases are published on the [GitHub Releases](https://github.com/spi
 | Windows | `.exe` (NSIS installer) | x86_64 |
 | Windows | `.zip` (portable) | x86_64 |
 
-Arch Linux users can also use the [PKGBUILD](./dist/archlinux/PKGBUILD) (source) or install directly from the AUR:
+Arch Linux users can install directly from the AUR:
 
+- [acreetionos-mediawriter](https://aur.archlinux.org/packages/acreetionos-mediawriter) — builds from source
 - [acreetionos-mediawriter-bin](https://aur.archlinux.org/packages/acreetionos-mediawriter-bin) — pre-built binary from GitHub releases
 - [mediawriter-git](https://aur.archlinux.org/packages/mediawriter-git) — development build (existing standalone package)
 
