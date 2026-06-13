@@ -12,7 +12,8 @@
         "--share=network",
         "--share=ipc",
         "--system-talk-name=org.freedesktop.UDisks2",
-        "--talk-name=org.freedesktop.Notifications"
+        "--talk-name=org.freedesktop.Notifications",
+        "--system-talk-name=org.freedesktop.PolicyKit1"
     ],
     "cleanup": [
         "/include",
@@ -23,12 +24,16 @@
         {
             "name": "MediaWriter",
             "buildsystem": "cmake-ninja",
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DENABLE_POLKIT=ON"
+            ],
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter.git",
-                    "tag": "v5.3.1",
-                    "commit": "ff85a2389455b3cfcdfe2b036663d952ce6eda51"
+                    "url": "https://github.com/spivanatalie64/AcreetionMediaWriter.git",
+                    "tag": "v5.4.0",
+                    "commit": "cinnamon-release-5.4.0"
                 }
             ]
         }

@@ -5,6 +5,7 @@ _Comment=Write AcreetionOS images to your portable drives
 Icon=org.acreetionos.MediaWriter
 Exec=mediawriter
 Terminal=false
-Categories=System;
-Keywords=acreetionos;usb;iso;bootable;
+Categories=System;Utility;X-Cinnamon;
+Keywords=acreetionos;usb;iso;bootable;flash;media;writer;
+X-Cinnamon-ShowIgnore=true
 

@@ -6,7 +6,7 @@ pkgver=5.3.50.r1929.8576e3e
 pkgrel=1
 pkgdesc="AcreetionOS USB Flasher — Flash AcreetionOS images to USB drives"
 arch=('x86_64')
-url="https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter"
+url="https://github.com/spivanatalie64/AcreetionMediaWriter"
 license=('GPL2')
 depends=(
   'qt6-base'
@@ -26,7 +26,7 @@ optdepends=(
   'udisks2: Disk Management Service for disk installation'
   'ventoy-bin: Install Ventoy bootable USB tool'
 )
-source=("git+https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter.git")
+source=("git+https://github.com/spivanatalie64/AcreetionMediaWriter.git")
 sha256sums=('SKIP')
 
 pkgver() {

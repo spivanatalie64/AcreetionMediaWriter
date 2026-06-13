@@ -56,7 +56,7 @@ ModalDialog {
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 text: qsTr("Based on Fedora Media Writer by the Fedora Project")
                 font.pixelSize: Math.round(units.gridUnit * 0.6)
-                color: palette.mid
+                color: acreetionOSTheme.textSecondary
             }
 
             QQC2.Label {
@@ -69,7 +69,9 @@ ModalDialog {
             QQC2.Label {
                 width: mainColumn.width - units.gridUnit * 2
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                text: qsTr("Please report bugs or your suggestions on %1").arg("<a href=\"https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/issues\"><font color=\"%1\">https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/</font></a>").arg(palette.link)
+                text: qsTr("Please report bugs or your suggestions on %1").arg(
+                    "<a href=\"https://github.com/spivanatalie64/AcreetionMediaWriter/issues\" style=\"color:" + acreetionOSTheme.linkColor + ";\">https://github.com/spivanatalie64/AcreetionMediaWriter/</a>"
+                )
                 textFormat: Text.RichText
                 onLinkActivated: Qt.openUrlExternally(link)
 

@@ -21,7 +21,7 @@ run our pre-built binaries you have to run `xattr -d com.apple.quarantine Fedora
 ### Known issues 
 
 There is a known issue in progress bar on macOS 26 in Qt 6.9.3.
-AcreetionOS Media Writer issue: https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/issues
+AcreetionOS Media Writer issue: https://github.com/spivanatalie64/AcreetionMediaWriter/issues
 
 ## Building
 

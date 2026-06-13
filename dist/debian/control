@@ -15,7 +15,7 @@ Build-Depends: cmake (>= 3.17),
                intltool,
                gettext
 Standards-Version: 4.7.0
-Homepage: https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+Homepage: https://github.com/spivanatalie64/AcreetionMediaWriter
 Rules-Requires-Root: no
 
 Package: acreetionos-mediawriter

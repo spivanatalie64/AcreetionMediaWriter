@@ -3,8 +3,8 @@ Version:        5.0.0
 Release:        1%{?dist}
 Summary:        AcreetionOS Media Writer
 
-URL:            https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
-Source0:        https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/-/archive/MediaWriter-%{version}.tar.gz
+URL:            https://github.com/spivanatalie64/AcreetionMediaWriter
+Source0:        https://github.com/spivanatalie64/AcreetionMediaWriter/archive/MediaWriter-%{version}.tar.gz
 
 Provides:       liveusb-creator = %{version}-%{release}
 Obsoletes:      liveusb-creator <= 3.95.4-2

@@ -368,12 +368,21 @@ void Drive::setImage(ReleaseVariant *data)
 static QString helperPath()
 {
 #if defined(__linux__)
+    // Development/build tree: helper built alongside the app
     if (QFile::exists(qApp->applicationDirPath() + "/../helper/linux/helper"))
         return qApp->applicationDirPath() + "/../helper/linux/helper";
+    // Flatpak/AppImage: helper bundled alongside
     if (QFile::exists(qApp->applicationDirPath() + "/helper"))
         return qApp->applicationDirPath() + "/helper";
+    // Standard install location (CMAKE_INSTALL_FULL_LIBEXECDIR)
     if (QFile::exists(QString("%1/%2").arg(LIBEXECDIR).arg("helper")))
         return QString("%1/%2").arg(LIBEXECDIR).arg("helper");
+    // Common alternative: /usr/libexec/mediawriter/helper
+    if (QFile::exists("/usr/libexec/mediawriter/helper"))
+        return "/usr/libexec/mediawriter/helper";
+    // /usr/lib/mediawriter/helper
+    if (QFile::exists("/usr/lib/mediawriter/helper"))
+        return "/usr/lib/mediawriter/helper";
 #elif defined(__APPLE__)
     if (QFile::exists(qApp->applicationDirPath() + "/../../../../helper/mac/helper.app/Contents/MacOS/helper"))
         return qApp->applicationDirPath() + "/../../../../helper/mac/helper.app/Contents/MacOS/helper";

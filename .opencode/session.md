@@ -1,11 +1,9 @@
 # Project: AcreetionOS Media Writer
 
 Fork of Fedora Media Writer, rebranded for AcreetionOS. Hosted at:
-- **GitLab**: https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
-- **GitHub (mirror)**: https://github.com/spivanatalie64/AcreetionMediaWriter
+- **GitHub**: https://github.com/spivanatalie64/AcreetionMediaWriter
 
 ## Git remotes
-- `acreetion` — GitLab (natalie/AcreetionMediaWriter, tracking branch)
 - `origin` — GitHub (spivanatalie64/AcreetionMediaWriter)
 - `upstream` — FedoraQt/MediaWriter (original)
 

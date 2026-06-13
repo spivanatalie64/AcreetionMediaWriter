@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2026 Natalie <natalie@acreetionos.org> -->
+<!-- Copyright 2026 Natalie Spiva <natalie@acreetionos.org> -->
 <component type="desktop-application">
 	<id>org.acreetionos.MediaWriter.desktop</id>
 	<launchable type="desktop-id">org.acreetionos.MediaWriter.desktop</launchable>
@@ -8,12 +8,13 @@
 	<name>AcreetionOS Media Writer</name>
 	<summary>Create an AcreetionOS live USB drive</summary>
 	<branding>
-		<color type="primary" scheme_preference="light">#aad0ee</color>
-		<color type="primary" scheme_preference="dark">#3c6eb4</color>
+		<color type="primary" scheme_preference="light">#2ecc71</color>
+		<color type="primary" scheme_preference="dark">#27ae60</color>
 	</branding>
 	<description>
 		<p>A tool to create a bootable live USB drive with an edition of AcreetionOS. Not only can AcreetionOS Media Writer write an image to your flash drive, it can also download it for you. It offers official editions and community spins. It provides basic information about each of them to help you make the right choice.</p>
 		<p>AcreetionOS Media Writer can also write other bootable ISOs loaded from your local disk.</p>
+		<p>Optimized for the Cinnamon desktop environment — follows your system theme preferences automatically.</p>
 	</description>
 	<keywords>
 		<keyword>iso</keyword>
@@ -23,13 +24,26 @@
 		<keyword>live</keyword>
 		<keyword>creator</keyword>
 		<keyword>media</keyword>
+		<keyword>cinnamon</keyword>
+		<keyword>flash</keyword>
 	</keywords>
-	<url type="homepage">https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter</url>
+	<url type="homepage">https://github.com/spivanatalie64/AcreetionMediaWriter</url>
+	<url type="bugtracker">https://github.com/spivanatalie64/AcreetionMediaWriter/issues</url>
+	<url type="donation">https://acreetionos.org/donate</url>
 	<screenshots>
-		<screenshot type="default"><image type="source">https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/-/raw/main/dist/screenshots/linux_main.png</image></screenshot>
-		<screenshot><image type="source">https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter/-/raw/main/dist/screenshots/linux_select_release.png</image></screenshot>
+		<screenshot type="default"><image type="source">https://raw.githubusercontent.com/spivanatalie64/AcreetionMediaWriter/main/dist/screenshots/linux_main.png</image></screenshot>
+		<screenshot><image type="source">https://raw.githubusercontent.com/spivanatalie64/AcreetionMediaWriter/main/dist/screenshots/linux_select_release.png</image></screenshot>
 	</screenshots>
-	<developer_name>Natalie</developer_name>
+	<developer_name>Natalie Spiva</developer_name>
 	<update_contact>natalie@acreetionos.org</update_contact>
 	<content_rating type="oars-1.1"/>
+	<releases>
+		<release version="5.4.0" date="2026-06-13">
+			<description>
+				<p>Cinnamon desktop integration — automatic dark/light theme following, improved system palette support</p>
+				<p>Fixed cross-platform dependency handling</p>
+				<p>Updated icon and branding resources</p>
+			</description>
+		</release>
+	</releases>
 </component>

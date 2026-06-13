@@ -26,6 +26,9 @@
 #include <QQmlContext>
 #include <QStyleHints>
 #include <QTranslator>
+#ifdef Q_OS_LINUX
+#include <QGuiApplication>
+#endif
 
 #include "crashhandler.h"
 #include "drivemanager.h"
@@ -38,27 +41,41 @@ int main(int argc, char **argv)
     CrashHandler::install();
 
 #ifdef __linux
-    // Ensure required system dependencies are installed
-    qInfo().noquote() << "================================================================================";
-    qInfo().noquote() << "  AcreetionOS Media Writer needs to install some system dependencies.";
-    qInfo().noquote() << "  You will be asked for your sudo password to authenticate.";
-    qInfo().noquote() << "  Packages: qt5-base qt5-declarative qt5-quickcontrols2";
-    qInfo().noquote() << "            qt5-graphicaleffects xdg-desktop-portal";
-    qInfo().noquote() << "            xdg-desktop-portal-gtk";
-    qInfo().noquote() << "================================================================================";
-    std::system("sudo pacman -S --needed qt5-base qt5-declarative qt5-quickcontrols2 qt5-graphicaleffects xdg-desktop-portal xdg-desktop-portal-gtk");
-
-    // For some reason threaded renderer makes all the animations slow for me
-    // so as a fallback force non-threaded renderer
-    if (qEnvironmentVariableIsEmpty("QSG_RENDER_LOOP")) {
-        qputenv("QSG_RENDER_LOOP", "basic");
-    }
+    // Detect desktop environment for optimal configuration
+    const QString desktopEnv = qEnvironmentVariable("XDG_CURRENT_DESKTOP").toUpper();
+    const QString sessionType = qEnvironmentVariable("XDG_SESSION_TYPE").toLower();
+    const bool isCinnamon = desktopEnv.contains("CINNAMON");
 
     // Use GTK3 platform theme for native integration on Cinnamon/GNOME/etc
-    // and respect system dark mode preference
+    // This makes Qt apps respect the system GTK theme (dark/light mode, fonts, etc.)
     if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORMTHEME")) {
         qputenv("QT_QPA_PLATFORMTHEME", "gtk3");
     }
+
+    // Wayland support for Cinnamon on Wayland sessions
+    if (sessionType == "wayland") {
+        if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM")) {
+            qputenv("QT_QPA_PLATFORM", "wayland;xcb");
+        }
+    }
+
+    // Use threaded renderer for smoother animations on modern hardware
+    if (qEnvironmentVariableIsEmpty("QSG_RENDER_LOOP")) {
+        if (isCinnamon) {
+            // Cinnamon's Muffin compositor works well with threaded rendering
+            qputenv("QSG_RENDER_LOOP", "threaded");
+        }
+    }
+
+    // Force Qt Quick to use the RHI backend (hardware-accelerated) when possible
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_BACKEND")) {
+        qputenv("QT_QUICK_BACKEND", "rhi");
+    }
+
+    // Log system info for debugging
+    qInfo().noquote() << "[Sprungles] Desktop integration:" << (isCinnamon ? "Cinnamon" : desktopEnv);
+    qInfo().noquote() << "[Sprungles] Session type:" << sessionType;
+    qInfo().noquote() << "[Sprungles] QT_QPA_PLATFORMTHEME=gtk3 enabled for native theming";
 #endif
 
     // Respect system dark mode preference via GTK3 theme integration

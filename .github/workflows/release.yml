@@ -104,9 +104,9 @@ jobs:
           Installed-Size: ${INSTALLED_SIZE}
           Section: utils
           Priority: optional
-          Homepage: https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+          Homepage: https://github.com/spivanatalie64/AcreetionMediaWriter
           Depends: libc6, liblzma5, libglib2.0-0, qml6-module-qtqml, qml6-module-qtqml-models, qml6-module-qtquick-controls, qml6-module-qtquick-layouts, qml6-module-qtquick-window, qml6-module-qtquick-dialogs, hicolor-icon-theme
-          Recommends: polkitd, udisks2
+          Recommends: polkitd, policykit-1, udisks2
           Description: AcreetionOS Media Writer - Write AcreetionOS images to portable drives
            A tool to create a bootable live USB drive with an edition of AcreetionOS.
            It can automatically download the required image and write it to a USB
@@ -188,7 +188,7 @@ jobs:
           Release:        1
           Summary:        AcreetionOS Media Writer
           License:        GPL-2.0+
-          URL:            https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+          URL:            https://github.com/spivanatalie64/AcreetionMediaWriter
 
           %description
           A tool to write images of AcreetionOS media to portable drives
@@ -255,7 +255,7 @@ jobs:
           pkgname = acreetionos-mediawriter
           pkgver = ${VERSION_STRIPPED}
           pkgdesc = AcreetionOS USB Flasher
-          url = https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+          url = https://github.com/spivanatalie64/AcreetionMediaWriter
           builddate = $(date -u +%s)
           packager = GitHub Actions
           size = $(du -sb . | cut -f1)

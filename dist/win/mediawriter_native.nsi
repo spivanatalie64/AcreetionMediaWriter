@@ -38,7 +38,7 @@ Caption "${APPNAME} ${SHORTVERSION}"
 # These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
 # It is possible to use "mailto:" links in here to open the email client
 
-!define HELPURL   "https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter" # "Support Information" link
+!define HELPURL   "https://github.com/spivanatalie64/AcreetionMediaWriter" # "Support Information" link
 !define UPDATEURL "https://acreetionos.org"                   # "Product Updates" link
 !define ABOUTURL  "https://acreetionos.org"                   # "Publisher" link
 

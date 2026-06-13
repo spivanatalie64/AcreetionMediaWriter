@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: AcreetionOS Media Writer
 Upstream-Contact: Natalie Spiva <natalie@acreetionos.org>
-Source: https://gitlab.acreetionos.org/natalie/AcreetionMediaWriter
+Source: https://github.com/spivanatalie64/AcreetionMediaWriter
 
 Files: *
 Copyright: 2026 Natalie Spiva <natalie@acreetionos.org>
