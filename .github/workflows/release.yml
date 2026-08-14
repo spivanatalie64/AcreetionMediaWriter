@@ -213,7 +213,8 @@ jobs:
         run: |
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="AcreetionOSMediaWriter-linux-x86_64-${{ env.TAG_NAME }}.rpm"
 
-  Arch Linux:
+  ArchLinux:
+    name: Arch Linux
     runs-on: ubuntu-latest
     container: archlinux:latest
     steps:

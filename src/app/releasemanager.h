@@ -209,7 +209,7 @@ private:
  * It can have multiple versions.
  *
  * @property index the index in the list
- * @property name the name of the release, 
+ * @property name the name of the release,
  * @property summary the summary describing the release - displayed on the main screen
  * @property description the extensive description of the release - displayed on the detail screen
  * @property source one of the sources listed in the @ref Source enum

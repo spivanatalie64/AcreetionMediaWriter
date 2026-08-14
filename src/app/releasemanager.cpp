@@ -424,13 +424,11 @@ void ReleaseManager::processHtmlListing(const QString &html)
         // Official editions: Cinnamon, XL (XLibre)
         // Community editions: everything else (KDE, Xfce, Gnome spins, etc.)
         QString category = "product";
-        if (release.contains("_kde") || release.contains("_xfce") || release.contains("_gnome")
-            || release.contains("_spin") || release.contains("_community") || release.contains("_lxqt")
-            || release.contains("_mate") || release.contains("_budgie") || release.contains("_sway"))
+        if (release.contains("_kde") || release.contains("_xfce") || release.contains("_gnome") || release.contains("_spin") || release.contains("_community") || release.contains("_lxqt") || release.contains("_mate")
+            || release.contains("_budgie") || release.contains("_sway"))
             category = "spins";
 
-        mDebug() << this->metaObject()->className() << "Adding (from dir)" << release << versionStr << arch
-                 << "category:" << category << "sha256:" << (sha256.isEmpty() ? "none" : "present") << "size:" << size;
+        mDebug() << this->metaObject()->className() << "Adding (from dir)" << release << versionStr << arch << "category:" << category << "sha256:" << (sha256.isEmpty() ? "none" : "present") << "size:" << size;
         updateUrl(release, version, QString(), "live", category, releaseDate, arch, url, sha256, size);
     };
 
