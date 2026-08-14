@@ -149,19 +149,24 @@ jobs:
           bash dist/upload-to-github.sh github_api_token=${{ secrets.GITHUB_TOKEN }} tag="${{ env.TAG_NAME }}" filename="org.acreetionos.MediaWriter.flatpak"
 
   RPM:
-    runs-on: ubuntu-latest
-    container: fedora:41
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
 
       - name: Set env (TAG_NAME)
         run: echo "TAG_NAME=$(bash ./dist/get-tag-name.sh)" >> $GITHUB_ENV
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{env.QT_VERSION}}
+          cache: true
+          cache-key-prefix: ${{ github.job }}-qt
+
       - name: Install build dependencies
         run: |
-          dnf install -y cmake make gcc-c++ gettext \
-            qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel \
-            xz-devel desktop-file-utils rpm-build
+          sudo apt update
+          sudo apt install -y liblzma-dev rpm
 
       - name: Build
         run: |
@@ -169,47 +174,7 @@ jobs:
           cmake --build build --parallel
 
       - name: Create RPM
-        run: |
-          set -eo pipefail
-          TAG="$TAG_NAME"
-          VERSION_STRIPPED=$(sed -e "s/^v//" -e "s/-.*//" <<< "$TAG")
-          if [[ "$VERSION_STRIPPED" == "" ]]; then
-            VERSION_STRIPPED=5.3.50
-          fi
-
-          DESTDIR=$(pwd)/rpm-staging cmake --install build
-          echo "RPM_STAGING=$(pwd)/rpm-staging" >> $GITHUB_ENV
-
-          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
-          cat > ~/rpmbuild/SPECS/acreetionos-mediawriter.spec << RPMSEC
-          Name:           acreetionos-mediawriter
-          Version:        ${VERSION_STRIPPED}
-          Release:        1
-          Summary:        AcreetionOS Media Writer
-          License:        GPL-2.0+
-          URL:            https://github.com/spivanatalie64/AcreetionMediaWriter
-
-          %description
-          A tool to write images of AcreetionOS media to portable drives
-          like flash drives or memory cards.
-
-          %install
-          # rpmbuild changes cwd to the BUILD dir, so the staging dir must come
-          # from the environment, not \$(pwd)
-          cp -a \${RPM_STAGING}/* %{buildroot}/
-
-          %files
-          %{_bindir}/mediawriter
-          %{_libexecdir}/mediawriter/
-          %{_datadir}/applications/org.acreetionos.MediaWriter.desktop
-          %{_datadir}/metainfo/org.acreetionos.MediaWriter.metainfo.xml
-          %{_datadir}/icons/hicolor/*/apps/org.acreetionos.MediaWriter.png
-          RPMSEC
-
-          rpmbuild -bb ~/rpmbuild/SPECS/acreetionos-mediawriter.spec
-
-          cp ~/rpmbuild/RPMS/x86_64/*.rpm "AcreetionOSMediaWriter-linux-x86_64-$TAG.rpm"
+        run: bash dist/linux/build-rpm.sh
 
       - name: Upload RPM to GitHub (release)
         if: github.ref_type == 'tag'
