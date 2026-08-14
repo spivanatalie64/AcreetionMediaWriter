@@ -12,17 +12,20 @@ This project is a fork of [Fedora Media Writer](https://github.com/FedoraQt/Medi
 
 - [Downloads](#downloads)
 - [Building](#building)
+- [Publishing a release](#publishing-a-release)
 - [Translation](#translation)
 - [Troubleshooting](#troubleshooting)
 - [Security & Privacy](#security--privacy)
 
-## FlatFree
+## Flatpak
 
-AcreetionOS Media Writer is also available on [FlatFree](https://natalie.acreetionos.org/FlatFree), a community Flatpak repository.
+A Flatpak bundle is attached to every GitHub release as
+`org.acreetionos.MediaWriter.flatpak` — download it from the
+[releases page](https://github.com/spivanatalie64/AcreetionMediaWriter/releases/latest)
+and install it with:
 
 ```bash
-flatpak remote-add --if-not-exists flatfree https://natalie.acreetionos.org/FlatFree/flatfree.flatpakrepo
-flatpak install flatfree org.acreetionos.MediaWriter
+flatpak install --user ./org.acreetionos.MediaWriter.flatpak
 ```
 
 ## Downloads
@@ -45,7 +48,6 @@ Arch Linux users can install from the AUR:
 
 - [acreetionos-mediawriter](https://aur.archlinux.org/packages/acreetionos-mediawriter) — builds from source
 - [acreetionos-mediawriter-bin](https://aur.archlinux.org/packages/acreetionos-mediawriter-bin) — pre-built binary from GitHub releases
-- [mediawriter-git](https://aur.archlinux.org/packages/mediawriter-git) — development build (existing standalone package)
 
 ```bash
 # With an AUR helper (e.g. paru or yay)
@@ -101,6 +103,35 @@ It is also possible to cross-compile using the `MinGW` compiler suite on Fedora 
 ### macOS
 
 Run `cmake` and `make` as usual. To create a standalone package, use the `macdeployqt` tool included with your Qt installation.
+
+## Publishing a release
+
+The app discovers releases from the mirror directory
+(`https://ftp2.osuosl.org/pub/acreetionos/`) using this chain, in order:
+
+1. **`releases.json`** — the structured manifest. Preferred source: it carries the
+   SHA-256 checksum and byte size for every edition, so downloads are verified
+   after transfer and progress bars have real totals.
+2. **`SHA256SUMS`** — the classic checksum sidecar. Used to verify downloads that
+   were discovered from the directory listing instead of the manifest.
+3. **The HTML directory listing** — auto-discovers any `Name-Version-Arch.iso`
+   file, so new uploads appear without an app update.
+
+To publish a new ISO:
+
+```bash
+# 1. Upload the ISO(s) to the mirror
+# 2. Generate the manifest + checksum sidecar (from a local staging dir or the mirror URL)
+python3 tools/generate-releases.py /path/to/staging --output dist/releases
+# or: python3 tools/generate-releases.py https://ftp2.osuosl.org/pub/acreetionos/ --output dist/releases
+# 3. Upload dist/releases/releases.json and dist/releases/SHA256SUMS next to the ISOs
+# 4. Commit any releases.json change to this repo so offline users get it too
+```
+
+`generate-releases.py` computes the SHA-256 of every official edition ISO,
+writes `releases.json` (embedded into the app as a fallback) and `SHA256SUMS`,
+and prints exactly what to upload. Community/unknown ISOs are skipped by the
+manifest but still auto-discovered by the app through the directory listing.
 
 ## Translation
 

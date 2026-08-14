@@ -14,12 +14,15 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic  // for ApplicationWindow theme access
 
 QtObject {
+    // Reflects the active GTK/system palette (dark or light mode).
+    // Declared as a QML object so the theme adapts live to system theme changes.
+    property SystemPalette sysPalette: SystemPalette {
+        colorGroup: SystemPalette.Active
+    }
+
     // Detect system dark/light mode from the GTK/application palette
     // Cinnamon uses GTK theming — Qt's gtk3 platform theme exposes this
     readonly property bool isDark: {
-        // Use the system palette to determine dark/light mode
-        // On Cinnamon with GTK3 platform theme, this reflects the GTK theme choice
-        var sysPalette = SystemPalette { colorGroup: SystemPalette.Active }
         var windowColor = sysPalette.window
         // If the window background is dark (low luminance), we're in dark mode
         var luminance = 0.299 * windowColor.r + 0.587 * windowColor.g + 0.114 * windowColor.b

@@ -355,8 +355,12 @@ void Download::onReadyRead()
 void Download::onError(QNetworkReply::NetworkError code)
 {
     mWarning() << "Error" << code << "reading from" << m_reply->url() << ":" << m_reply->errorString();
-    if (m_path.isEmpty())
+    if (m_path.isEmpty()) {
+        // Page fetch (release manifest, listing, SHA256SUMS): report the failure so the
+        // receiver can fall back to an alternative source instead of hanging silently.
+        m_receiver->onDownloadError(m_reply->errorString());
         return;
+    }
 
     QNetworkReply *reply = manager()->tryAnotherMirror();
     if (reply)
@@ -421,8 +425,11 @@ void Download::onTimedOut()
 {
     mWarning() << m_reply->url() << "timed out. Trying another mirror.";
     m_reply->deleteLater();
-    if (m_path.isEmpty())
+    if (m_path.isEmpty()) {
+        // Page fetch: report so the receiver can fall back instead of hanging silently.
+        m_receiver->onDownloadError(tr("Connection timed out"));
         return;
+    }
 
     QNetworkReply *reply = manager()->tryAnotherMirror();
     if (reply)

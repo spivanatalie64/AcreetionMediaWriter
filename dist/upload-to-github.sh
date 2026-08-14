@@ -61,8 +61,9 @@ curl -d '{ "tag_name": "'$tag'", "target_commitish": "", "name": "'$tag'", "body
 # Read asset tags.
 response=$(curl -sH "$AUTH" $GH_TAGS)
 
-# Get ID of the asset based on given filename.
-eval $(echo "$response" | grep -m 1 "id.:" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
+# Get the release id from the response. The first "id": field of a release
+# object is the release's own id (node_id never matches the quoted form).
+id=$(printf '%s' "$response" | grep -oE '"id": *[0-9]+' | head -1 | grep -oE '[0-9]+')
 [ "$id" ] || { echo "Error: Failed to get release id for tag: $tag"; echo "$response" | awk 'length($0)<100' >&2; exit 1; }
 
 # Upload asset

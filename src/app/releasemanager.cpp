@@ -25,10 +25,13 @@
 
 #include <QAbstractEventDispatcher>
 #include <QApplication>
+#include <QFileInfo>
 #include <QtQml>
 
 #include <QJsonDocument>
 #include <QRegularExpression>
+
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -88,13 +91,14 @@ void ReleaseManager::fetchReleases()
     m_beingUpdated = true;
     Q_EMIT beingUpdatedChanged();
 
-    DownloadManager::instance()->fetchPageAsync(this, options.releasesUrl);
+    m_fetchAttempts++;
+    m_lastFetchUrl = options.releasesUrl;
+    mDebug() << this->metaObject()->className() << "Fetching release data from" << m_lastFetchUrl;
+    DownloadManager::instance()->fetchPageAsync(this, m_lastFetchUrl);
 }
 
 void ReleaseManager::variantChangedFilter()
 {
-    // TODO here we could add some filters to help signal/slot performance
-    // TODO otherwise this can just go away and connections can be directly to the signal
     Q_EMIT variantChanged();
 }
 
@@ -113,7 +117,8 @@ void ReleaseManager::setFrontPage(bool o)
     if (m_frontPage != o) {
         m_frontPage = o;
         Q_EMIT frontPageChanged();
-        invalidateFilter();
+        beginFilterChange();
+        endFilterChange();
     }
 }
 
@@ -127,7 +132,8 @@ void ReleaseManager::setFilterText(const QString &o)
     if (m_filterText != o) {
         m_filterText = o;
         Q_EMIT filterTextChanged();
-        invalidateFilter();
+        beginFilterChange();
+        endFilterChange();
     }
 }
 
@@ -142,7 +148,8 @@ void ReleaseManager::setFilterSource(int source)
         m_filterSource = source;
         Q_EMIT filterSourceChanged();
         Q_EMIT firstSourceChanged();
-        invalidateFilter();
+        beginFilterChange();
+        endFilterChange();
     }
 }
 
@@ -243,7 +250,8 @@ void ReleaseManager::setFilterArchitecture(int o)
                 }
             }
         }
-        invalidateFilter();
+        beginFilterChange();
+        endFilterChange();
     }
 }
 
@@ -281,98 +289,225 @@ ReleaseVariant *ReleaseManager::variant()
 
 void ReleaseManager::onStringDownloaded(const QString &text)
 {
-    mDebug() << this->metaObject()->className() << "Received release data";
+    mDebug() << this->metaObject()->className() << "Received release data from" << m_lastFetchUrl;
 
-    // AcreetionOS fork: support two data sources
-    //   1. Static JSON (https://acreetionos.org/releases.json) — structured release metadata
-    //   2. HTML directory listing (https://ftp2.osuosl.org/pub/acreetionos/) — auto-discovers ISOs
-    //
-    // JSON takes precedence; if parsing fails we try the HTML fallback so that
-    // new ISO uploads are automatically picked up without updating the app.
-
+    // 1. Structured JSON manifest - the preferred source (sha256 + size included)
     QJsonParseError jsonError;
     auto doc = QJsonDocument::fromJson(text.toUtf8(), &jsonError);
-
     if (jsonError.error == QJsonParseError::NoError && doc.isArray()) {
-        QRegularExpression re("(\\d+)\\s?(\\S+)?");
-        for (auto i : doc.array()) {
-            QJsonObject obj = i.toObject();
-            QString arch = obj["arch"].toString().toLower();
-            QString url = obj["link"].toString();
-            QString category = obj["variant"].toString().toLower();
-            QString release = obj["subvariant"].toString().toLower();
-            QString versionWithStatus = obj["version"].toString().toLower();
-            QString sha256 = obj["sha256"].toString();
-            QString type = "live";
-            QDateTime releaseDate = QDateTime::fromString((obj["releaseDate"].toString()), "yyyy-MM-dd");
-            int64_t size = obj["size"].toString().toLongLong();
-
-            if (QStringList{"cloud", "cloud_base", "everything", "minimal", "docker", "docker_base"}.contains(release))
-                continue;
-            if (!url.endsWith("iso") || url.contains("-osb-") || url.contains("-provisioner-"))
-                continue;
-            if (!re.match(versionWithStatus).hasMatch())
-                continue;
-
-            int version = re.match(versionWithStatus).captured(1).toInt();
-            QString status = re.match(versionWithStatus).captured(2);
-
-            mDebug() << this->metaObject()->className() << "Adding" << release << versionWithStatus << arch;
-            if (!release.isEmpty() && !url.isEmpty() && !arch.isEmpty())
-                updateUrl(release, version, status, type, category, releaseDate, arch, url, sha256, size);
-        }
-    } else {
-        // ---- HTML directory listing fallback (used with ftp2.osuosl.org) ----
-        // The OSUOSL FTP server returns Apache-style HTML directory listings.
-        // We extract every <a href="...iso"> link to dynamically discover ISOs.
-        // This means new releases are picked up automatically as soon as they
-        // are uploaded — no app update or JSON manifest needed.
-
-        QRegularExpression isoRe("<a\\s+href=\"([^\"]+\\.iso)\"[^>]*>([^<]+)</a>");
-        auto it = isoRe.globalMatch(text);
-        while (it.hasNext()) {
-            auto match = it.next();
-            QString filename = match.captured(1);
-            QString url = QStringLiteral("https://ftp2.osuosl.org/pub/acreetionos/%1").arg(filename);
-
-            // Parse filename with pattern: Name-Version-Arch.iso
-            // e.g. "AcreetionOS-1.0-x86_64.iso" -> Name="acreetionos", Version="1.0", Arch="x86_64"
-            QRegularExpression fileRe("^(.+?)[-_]([\\d.]+)-([\\w_]+)\\.iso$");
-            auto fileMatch = fileRe.match(filename);
-            if (!fileMatch.hasMatch())
-                continue;
-
-            QString release = fileMatch.captured(1).toLower();
-            QString versionStr = fileMatch.captured(2);
-            QString arch = fileMatch.captured(3).toLower();
-
-            if (release.isEmpty() || arch.isEmpty())
-                continue;
-
-            int version = versionStr.split(".").first().toInt();
-
-            // Official editions: Cinnamon, XL (XLibre)
-            // Community editions: everything else (KDE, Xfce, Gnome spins, etc.)
-            QString category = "product";
-            if (release.contains("_kde") || release.contains("_xfce") || release.contains("_gnome")
-                || release.contains("_spin") || release.contains("_community") || release.contains("_lxqt")
-                || release.contains("_mate") || release.contains("_budgie") || release.contains("_sway"))
-                category = "spins";
-
-            mDebug() << this->metaObject()->className() << "Adding (from dir)" << release << versionStr << arch << "category:" << category;
-            updateUrl(release, version, QString(), "live", category, QDateTime(), arch, url, QString(), 0);
-        }
+        processJson(text);
+        resetFetchState();
+        return;
     }
 
-    m_beingUpdated = false;
-    Q_EMIT beingUpdatedChanged();
+    // 2. SHA256SUMS sidecar response - enrich the stored directory listing with
+    //    real checksums, then process it
+    if (m_lastFetchUrl.endsWith("SHA256SUMS"_L1) && !m_pendingHtml.isEmpty()) {
+        parseSha256Sums(text);
+        processHtmlListing(m_pendingHtml);
+        resetFetchState();
+        return;
+    }
+
+    // 3. Non-JSON response. If it carries ISO links it IS the directory listing;
+    //    otherwise it is an error page (e.g. a 404 for a missing manifest) and we
+    //    fetch the actual listing. Either way, we then fetch SHA256SUMS so that
+    //    downloads discovered from the listing can still be verified.
+    if (text.contains(".iso"_L1) || m_lastFetchUrl == options.releasesDir) {
+        m_pendingHtml = text;
+        m_shaSums.clear();
+        m_lastFetchUrl = options.releasesDir + "SHA256SUMS"_L1;
+        mDebug() << this->metaObject()->className() << "Fetching" << m_lastFetchUrl;
+        DownloadManager::instance()->fetchPageAsync(this, m_lastFetchUrl);
+    } else {
+        mWarning() << "Release data from" << m_lastFetchUrl << "is not a JSON manifest; falling back to the directory listing";
+        m_lastFetchUrl = options.releasesDir;
+        DownloadManager::instance()->fetchPageAsync(this, m_lastFetchUrl);
+    }
 }
 
 void ReleaseManager::onDownloadError(const QString &message)
 {
-    mWarning() << "Was not able to fetch new releases:" << message << "Retrying in 10 seconds.";
+    mWarning() << "Was not able to fetch release data from" << m_lastFetchUrl << ":" << message;
 
-    QTimer::singleShot(10000, this, SLOT(fetchReleases()));
+    // SHA256SUMS fetch failed - process the stored listing without checksums
+    // rather than losing the releases we already discovered
+    if (m_lastFetchUrl.endsWith("SHA256SUMS"_L1) && !m_pendingHtml.isEmpty()) {
+        mWarning() << "SHA256SUMS unavailable; processing directory listing without checksums";
+        processHtmlListing(m_pendingHtml);
+        resetFetchState();
+        return;
+    }
+
+    // Manifest fetch failed - fall back to the HTML directory listing
+    if (m_lastFetchUrl == options.releasesUrl && m_pendingHtml.isEmpty()) {
+        mDebug() << "Manifest unavailable; falling back to the directory listing";
+        m_lastFetchUrl = options.releasesDir;
+        DownloadManager::instance()->fetchPageAsync(this, m_lastFetchUrl);
+        return;
+    }
+
+    // The whole chain failed - retry a bounded number of times, then settle on
+    // the embedded releases.json so the app stays usable offline
+    if (m_fetchAttempts < MAX_FETCH_ATTEMPTS) {
+        mWarning() << "Retrying release fetch in 10 seconds (attempt" << m_fetchAttempts << "of" << MAX_FETCH_ATTEMPTS << ")";
+        QTimer::singleShot(10000, this, SLOT(fetchReleases()));
+    } else {
+        mWarning() << "Giving up on fetching releases after" << MAX_FETCH_ATTEMPTS << "attempts; using embedded release data";
+        resetFetchState();
+    }
+}
+
+void ReleaseManager::processJson(const QString &text)
+{
+    QJsonParseError jsonError;
+    auto doc = QJsonDocument::fromJson(text.toUtf8(), &jsonError);
+    if (jsonError.error != QJsonParseError::NoError || !doc.isArray())
+        return;
+
+    QRegularExpression re("(\\d+)\\s?(\\S+)?");
+    for (auto i : doc.array()) {
+        QJsonObject obj = i.toObject();
+        QString arch = obj["arch"].toString().toLower();
+        QString url = obj["link"].toString();
+        QString category = obj["variant"].toString().toLower();
+        QString release = obj["subvariant"].toString().toLower();
+        QString versionWithStatus = obj["version"].toString().toLower();
+        QString sha256 = obj["sha256"].toString();
+        QString type = "live";
+        QDateTime releaseDate = QDateTime::fromString((obj["releaseDate"].toString()), "yyyy-MM-dd");
+        int64_t size = obj["size"].toString().toLongLong();
+
+        if (QStringList{"cloud", "cloud_base", "everything", "minimal", "docker", "docker_base"}.contains(release))
+            continue;
+        if (!url.endsWith("iso") || url.contains("-osb-") || url.contains("-provisioner-"))
+            continue;
+        if (!re.match(versionWithStatus).hasMatch())
+            continue;
+
+        int version = re.match(versionWithStatus).captured(1).toInt();
+        QString status = re.match(versionWithStatus).captured(2);
+
+        mDebug() << this->metaObject()->className() << "Adding" << release << versionWithStatus << arch;
+        if (!release.isEmpty() && !url.isEmpty() && !arch.isEmpty())
+            updateUrl(release, version, status, type, category, releaseDate, arch, url, sha256, size);
+    }
+}
+
+void ReleaseManager::processHtmlListing(const QString &html)
+{
+    // Apache-style directory listing. Row layout:
+    //   <td><a href="AcreetionOS-1.0-x86_64.iso">AcreetionOS-1.0-x86_64.iso</a></td>
+    //   <td align="right">2026-08-09 14:34</td><td align="right">2.2G</td>
+    // Enriched regex: captures filename, date cell, size cell.
+    QRegularExpression isoRe("<a\\s+href=\"([^\"]+\\.iso)\"[^>]*>[^<]*</a>\\s*</td>\\s*<td[^>]*>\\s*([^<]*?)\\s*</td>\\s*<td[^>]*>\\s*([^<]*?)\\s*</td>");
+    QRegularExpression looseRe("<a\\s+href=\"([^\"]+\\.iso)\"[^>]*>");
+    const QRegularExpression fileRe("^(.+?)[-_]([\\d.]+)-([\\w_]+)\\.iso$");
+
+    auto addIso = [&](const QString &filename, const QString &sha256, qint64 size, const QDateTime &releaseDate) {
+        if (filename.contains('/') || filename.startsWith('?'))
+            return;
+        QString url = options.releasesDir + filename;
+
+        auto fileMatch = fileRe.match(filename);
+        if (!fileMatch.hasMatch())
+            return;
+
+        QString release = fileMatch.captured(1).toLower();
+        QString versionStr = fileMatch.captured(2);
+        QString arch = fileMatch.captured(3).toLower();
+        if (release.isEmpty() || arch.isEmpty())
+            return;
+
+        int version = versionStr.split(".").first().toInt();
+
+        // Official editions: Cinnamon, XL (XLibre)
+        // Community editions: everything else (KDE, Xfce, Gnome spins, etc.)
+        QString category = "product";
+        if (release.contains("_kde") || release.contains("_xfce") || release.contains("_gnome")
+            || release.contains("_spin") || release.contains("_community") || release.contains("_lxqt")
+            || release.contains("_mate") || release.contains("_budgie") || release.contains("_sway"))
+            category = "spins";
+
+        mDebug() << this->metaObject()->className() << "Adding (from dir)" << release << versionStr << arch
+                 << "category:" << category << "sha256:" << (sha256.isEmpty() ? "none" : "present") << "size:" << size;
+        updateUrl(release, version, QString(), "live", category, releaseDate, arch, url, sha256, size);
+    };
+
+    int enriched = 0;
+    auto it = isoRe.globalMatch(html);
+    while (it.hasNext()) {
+        auto match = it.next();
+        const QString filename = match.captured(1);
+        const QDateTime releaseDate = QDateTime::fromString(match.captured(2).trimmed(), "yyyy-MM-dd HH:mm");
+        const qint64 size = parseApacheSize(match.captured(3));
+        addIso(filename, m_shaSums.value(filename), size, releaseDate);
+        enriched++;
+    }
+
+    // Loose fallback for servers with a different row layout: never lose discovery
+    if (enriched == 0) {
+        mDebug() << this->metaObject()->className() << "Row layout not recognized; using loose ISO discovery";
+        auto it2 = looseRe.globalMatch(html);
+        while (it2.hasNext()) {
+            const QString filename = it2.next().captured(1);
+            addIso(filename, m_shaSums.value(filename), 0, QDateTime());
+        }
+    }
+}
+
+void ReleaseManager::parseSha256Sums(const QString &text)
+{
+    m_shaSums.clear();
+    const QRegularExpression hex64("^[0-9a-fA-F]{64}$");
+    for (const QString &rawLine : text.split('\n')) {
+        const QString line = rawLine.trimmed();
+        if (line.isEmpty() || line.startsWith('#'))
+            continue;
+        const QStringList parts = line.split(QRegularExpression("\\s+"));
+        if (parts.size() < 2)
+            continue;
+        // Support both "hash  filename" (sha256sum) and "filename  hash" (BSD) layouts
+        QString hash = parts.value(0);
+        QString name = parts.value(1);
+        if (!hex64.match(hash).hasMatch() && hex64.match(name).hasMatch())
+            std::swap(hash, name);
+        if (!hex64.match(hash).hasMatch())
+            continue;
+        // Strip "sha256sum -c" prefixes such as "./" or "*" that some tools emit
+        m_shaSums.insert(QFileInfo(name).fileName(), hash.toLower());
+    }
+    mDebug() << this->metaObject()->className() << "Parsed" << m_shaSums.size() << "checksum(s) from SHA256SUMS";
+}
+
+qint64 ReleaseManager::parseApacheSize(const QString &cell) const
+{
+    const QString s = cell.trimmed();
+    if (s.isEmpty())
+        return 0;
+    const QRegularExpression re("^([\\d.]+)\\s*([KMG]?)$");
+    auto m = re.match(s);
+    if (!m.hasMatch())
+        return s.toLongLong();
+    double v = m.captured(1).toDouble();
+    const QString unit = m.captured(2);
+    if (unit == "K")
+        v *= 1024;
+    else if (unit == "M")
+        v *= 1024 * 1024;
+    else if (unit == "G")
+        v *= 1024.0 * 1024 * 1024;
+    return static_cast<qint64>(v);
+}
+
+void ReleaseManager::resetFetchState()
+{
+    m_lastFetchUrl.clear();
+    m_pendingHtml.clear();
+    m_shaSums.clear();
+    m_fetchAttempts = 0;
+    m_beingUpdated = false;
+    Q_EMIT beingUpdatedChanged();
 }
 
 QStringList ReleaseManager::architectures() const

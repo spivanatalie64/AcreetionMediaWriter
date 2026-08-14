@@ -22,6 +22,7 @@
 #define RELEASEMANAGER_H
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QQmlListProperty>
 #include <QSortFilterProxyModel>
 
@@ -147,6 +148,12 @@ Q_SIGNALS:
     void localFileChanged();
 
 private:
+    void processJson(const QString &text);
+    void processHtmlListing(const QString &html);
+    void parseSha256Sums(const QString &text);
+    qint64 parseApacheSize(const QString &cell) const;
+    void resetFetchState();
+
     ReleaseListModel *m_sourceModel{nullptr};
     bool m_frontPage{true};
     QString m_filterText{};
@@ -154,6 +161,18 @@ private:
     int m_filterSource{0};
     int m_selectedIndex{0};
     bool m_beingUpdated{false};
+
+    // Release-discovery state machine. The app tries, in order:
+    //   1. options.releasesUrl     - structured JSON manifest (sha256 + size)
+    //   2. <releasesDir>SHA256SUMS - hash sidecar for the directory listing
+    //   3. <releasesDir>           - HTML directory listing (auto-discovers ISOs)
+    // A failed step falls through to the next one; after MAX_FETCH_ATTEMPTS
+    // consecutive network failures we settle on the embedded releases.json.
+    QString m_lastFetchUrl{};
+    QString m_pendingHtml{};
+    QHash<QString, QString> m_shaSums{}; // filename -> lowercase sha256 hex
+    int m_fetchAttempts{0};
+    static constexpr int MAX_FETCH_ATTEMPTS = 5;
 };
 
 /**

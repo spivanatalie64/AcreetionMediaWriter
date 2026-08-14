@@ -30,8 +30,6 @@ static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, c
 static QElapsedTimer timer;
 static FILE *debugFile;
 
-// TODO: everything Q_UNUSED
-
 Progress::Progress(QObject *parent, qreal from, qreal to)
     : QObject(parent)
     , m_from(from)
@@ -58,6 +56,10 @@ qreal Progress::value() const
 
 qreal Progress::ratio() const
 {
+    // Guard against division by zero when the total size is not yet known
+    // (e.g. releases discovered from a directory listing without a manifest)
+    if (m_to <= m_from)
+        return 0.0;
     return (value() - from()) / (to() - from());
 }
 
@@ -122,6 +124,19 @@ int Options::parse(QStringList argv)
     if (argv.contains("--no-user-agent")) {
         noUserAgent = true;
     }
+    if ((index = argv.indexOf("--releasesDir")) >= 0) {
+        if (index >= argv.length() - 1) {
+            printHelp();
+            return 1;
+        } else {
+            releasesDir = argv[index + 1];
+            // If the manifest URL was not overridden explicitly, derive it from the
+            // new directory so all three sources (manifest, SHA256SUMS, listing)
+            // point at the same place.
+            if (!argv.contains("--releasesUrl"))
+                releasesUrl = releasesDir + "releases.json";
+        }
+    }
     if (argv.contains("--help")) {
         printHelp();
         return 0;
@@ -144,7 +159,12 @@ int Options::parse(QStringList argv)
 void Options::printHelp()
 {
     QTextStream out(stdout);
-    out << "mediawriter [--no-user-agent] [--releasesUrl <url>] [--logging|-l] [--verbose|-v]\n";
+    out << "mediawriter [--no-user-agent] [--releasesUrl <json-url>] [--releasesDir <dir-url>] [--logging|-l] [--verbose|-v]\n";
+    out << "  --releasesUrl <json-url>  override the release manifest URL (JSON with sha256 + size)\n";
+    out << "  --releasesDir <dir-url>   override the mirror directory (ISOs, releases.json, SHA256SUMS)\n";
+    out << "  --no-user-agent           do not send the AcreetionOS Media Writer user agent\n";
+    out << "  --logging, -l             write a debug log to $HOME/Documents/AcreetionOSMediaWriter.log\n";
+    out << "  --verbose, -v             verbose debug output to stderr\n";
 }
 
 static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)

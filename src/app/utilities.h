@@ -83,9 +83,14 @@ public:
 #else
     bool logging{true};
 #endif
-    // AcreetionOS: Points to the OSUOSL FTP directory listing so ISOs are discovered
-    // dynamically. Falls back to parsing HTML. Override with --releasesUrl for JSON.
-    QString releasesUrl{"https://ftp2.osuosl.org/pub/acreetionos/"};
+    // AcreetionOS: Base directory hosting the release artifacts (ISOs, releases.json, SHA256SUMS).
+    // Everything is discovered from here; individual URLs are derived at runtime.
+    QString releasesDir{"https://ftp2.osuosl.org/pub/acreetionos/"};
+    // Structured release manifest. Preferred source: carries sha256 + size so downloads are
+    // verified and progress bars have real totals. If it is unreachable or not valid JSON,
+    // the app falls back to parsing the directory listing above, enriched by SHA256SUMS.
+    // Override the manifest location with --releasesUrl <url>.
+    QString releasesUrl{releasesDir + "releases.json"};
     bool noUserAgent{false}; // disables sending the custom AcreetionOS Media Writer user agent header
 };
 
