@@ -37,8 +37,7 @@ jobs:
               --title "AcreetionOS Media Writer ${{ steps.tag.outputs.tag }}" \
               --notes "Release ${{ steps.tag.outputs.tag }}
 
-          $(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | sed 's/^/- /')" \
-              --prerelease
+          $(git log --oneline --no-merges $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | sed 's/^/- /')"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
