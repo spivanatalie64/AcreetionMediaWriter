@@ -106,8 +106,9 @@ Run `cmake` and `make` as usual. To create a standalone package, use the `macdep
 
 ## Publishing a release
 
-The app discovers releases from the mirror directory
-(`https://ftp2.osuosl.org/pub/acreetionos/`) using this chain, in order:
+The app discovers releases from the project's own mirror
+(`https://iso.acreetionos.org/acreetion/`, Cloudflare CDN in front of the US
+server, with an OSUOSL mirror as fallback) using this chain, in order:
 
 1. **`releases.json`** — the structured manifest. Preferred source: it carries the
    SHA-256 checksum and byte size for every edition, so downloads are verified
@@ -123,7 +124,7 @@ To publish a new ISO:
 # 1. Upload the ISO(s) to the mirror
 # 2. Generate the manifest + checksum sidecar (from a local staging dir or the mirror URL)
 python3 tools/generate-releases.py /path/to/staging --output dist/releases
-# or: python3 tools/generate-releases.py https://ftp2.osuosl.org/pub/acreetionos/ --output dist/releases
+# or: python3 tools/generate-releases.py https://iso.acreetionos.org/acreetion/ --output dist/releases
 # 3. Upload dist/releases/releases.json and dist/releases/SHA256SUMS next to the ISOs
 # 4. Commit any releases.json change to this repo so offline users get it too
 ```

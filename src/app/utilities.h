@@ -84,8 +84,9 @@ public:
     bool logging{true};
 #endif
     // AcreetionOS: Base directory hosting the release artifacts (ISOs, releases.json, SHA256SUMS).
-    // Everything is discovered from here; individual URLs are derived at runtime.
-    QString releasesDir{"https://ftp2.osuosl.org/pub/acreetionos/"};
+    // Canonical source is the project's own mirror (Cloudflare CDN in front of the
+    // US server); the OSUOSL mirror can be used instead with --releasesDir.
+    QString releasesDir{"https://iso.acreetionos.org/acreetion/"};
     // Structured release manifest. Preferred source: carries sha256 + size so downloads are
     // verified and progress bars have real totals. If it is unreachable or not valid JSON,
     // the app falls back to parsing the directory listing above, enriched by SHA256SUMS.
