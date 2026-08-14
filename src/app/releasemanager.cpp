@@ -117,8 +117,14 @@ void ReleaseManager::setFrontPage(bool o)
     if (m_frontPage != o) {
         m_frontPage = o;
         Q_EMIT frontPageChanged();
+        // Qt >= 6.10: beginFilterChange()/endFilterChange() replace invalidateFilter().
+        // Older Qt (6.6-6.9: Fedora 41, KDE flatpak runtime) only has invalidateFilter().
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateFilter();
+#endif
     }
 }
 
@@ -132,8 +138,14 @@ void ReleaseManager::setFilterText(const QString &o)
     if (m_filterText != o) {
         m_filterText = o;
         Q_EMIT filterTextChanged();
+        // Qt >= 6.10: beginFilterChange()/endFilterChange() replace invalidateFilter().
+        // Older Qt (6.6-6.9: Fedora 41, KDE flatpak runtime) only has invalidateFilter().
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateFilter();
+#endif
     }
 }
 
@@ -148,8 +160,14 @@ void ReleaseManager::setFilterSource(int source)
         m_filterSource = source;
         Q_EMIT filterSourceChanged();
         Q_EMIT firstSourceChanged();
+        // Qt >= 6.10: beginFilterChange()/endFilterChange() replace invalidateFilter().
+        // Older Qt (6.6-6.9: Fedora 41, KDE flatpak runtime) only has invalidateFilter().
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateFilter();
+#endif
     }
 }
 
@@ -250,8 +268,14 @@ void ReleaseManager::setFilterArchitecture(int o)
                 }
             }
         }
+        // Qt >= 6.10: beginFilterChange()/endFilterChange() replace invalidateFilter().
+        // Older Qt (6.6-6.9: Fedora 41, KDE flatpak runtime) only has invalidateFilter().
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateFilter();
+#endif
     }
 }
 

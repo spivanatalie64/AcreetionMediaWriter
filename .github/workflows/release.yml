@@ -178,6 +178,7 @@ jobs:
           fi
 
           DESTDIR=$(pwd)/rpm-staging cmake --install build
+          echo "RPM_STAGING=$(pwd)/rpm-staging" >> $GITHUB_ENV
 
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
@@ -194,7 +195,9 @@ jobs:
           like flash drives or memory cards.
 
           %install
-          cp -a $(pwd)/rpm-staging/* %{buildroot}/
+          # rpmbuild changes cwd to the BUILD dir, so the staging dir must come
+          # from the environment, not \$(pwd)
+          cp -a \${RPM_STAGING}/* %{buildroot}/
 
           %files
           %{_bindir}/mediawriter
