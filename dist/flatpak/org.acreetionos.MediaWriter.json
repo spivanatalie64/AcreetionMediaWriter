@@ -30,10 +30,8 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://github.com/spivanatalie64/AcreetionMediaWriter.git",
-                    "tag": "v5.4.0",
-                    "commit": "cinnamon-release-5.4.0"
+                    "type": "dir",
+                    "path": "."
                 }
             ]
         }
