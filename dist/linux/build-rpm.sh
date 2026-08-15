@@ -43,6 +43,7 @@ cp -a \${RPM_STAGING}/* %{buildroot}/
 %{_datadir}/applications/org.acreetionos.MediaWriter.desktop
 %{_datadir}/metainfo/org.acreetionos.MediaWriter.metainfo.xml
 %{_datadir}/icons/hicolor/*/apps/org.acreetionos.MediaWriter.png
+%{_datadir}/polkit-1/actions/org.acreetionos.MediaWriter.policy
 RPMSEC
 
 RPM_STAGING="$STAGING" rpmbuild -bb ~/rpmbuild/SPECS/acreetionos-mediawriter.spec
