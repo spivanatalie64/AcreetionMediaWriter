@@ -56,9 +56,9 @@ fi
 # Validate token.
 curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or network issue!";  exit 1; }
 
-curl -d '{ "tag_name": "'$tag'", "target_commitish": "", "name": "'$tag'", "body": "'$tag'", "draft": false, "prerelease": true }' -H "Content-Type: application/json" -X POST -o /dev/null -sH "$AUTH" $GH_RELEASES
-
-# Read asset tags.
+# The release is created by the workflow's create-release job; never create it
+# here (a POST with an existing tag would silently create duplicate releases,
+# and a duplicate would break releases/latest). Fail loudly if it is missing.
 response=$(curl -sH "$AUTH" $GH_TAGS)
 
 # Get the release id from the response. The first "id": field of a release
